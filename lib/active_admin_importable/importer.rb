@@ -2,16 +2,11 @@ module ActiveAdminImportable
   module Importer
     def self.import extension, resource, file, options={}
       result = {imported: 0, failed: 0, errors: [""]}
-      resource = resource.constantize
-
       data =
         case extension
           when 'csv'
             self::CSV.parse file
-          when 'json'
-            self::JSON.parse file
-          when 'xml'
-            self::XML.parse file
+
         end
 
       if data[:header]
@@ -35,14 +30,14 @@ module ActiveAdminImportable
           if value && [:date, :datetime].include?(resource.columns_hash[attribute].type)
             row[attribute] = options[:date_format] ? Date.strptime(value, options[:date_format]) : Chronic.parse(value)
           else
-            row[attribute] = value
+            row[attribute] =  value.nil? ? nil : value.to_s.encode('UTF-8', :undef => :replace, :invalid => :replace)
           end
         end
 
         new_resource = resource.new(row)
-        if new_resource.valid? && new_resource.save
+        if  new_resource.save
           result[:imported] += 1
-        elsif !new_resource.errors.messages.blank?
+        else
           result[:failed] += 1
           new_resource.errors.messages.each do |k,v|
             v.each do |em|

@@ -15,5 +15,5 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = ActiveAdminImportable::VERSION
 
-  #gem.dependencies = ['activeadmin']
+  gem.add_dependency('chronic')
 end
